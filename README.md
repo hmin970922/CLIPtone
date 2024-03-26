@@ -1,20 +1,20 @@
 # CLIPtone
-[CLIPtone](https://youngchan-k.github.io/nespof) is an physically-valid neural representation that models spectro-polarimetric fields.
-The code is based on [NeRF-pytorch](https://github.com/yenchenlin/nerf-pytorch) and you should follow the [requirements.txt](https://github.com/yenchenlin/nerf-pytorch/blob/master/requirements.txt) provided there.
+[CLIPtone](https://hmin970922.github.io/CLIPtone/) is a text-based tone adjustment method with unsupervised manner.
+The code is based on [AdaInt](https://github.com/ImCharlesY/AdaInt) and [StyleGAN-nada](https://github.com/rinongal/StyleGAN-nada).
+
+
 
 ## Installation
 ```
-git clone https://github.com/youngchan-k/NeSpoF.git
-cd nespof
+git clone https://github.com/hmin970922/CLIPtone.git
+cd CLIPtone
 pip install -r requirements.txt
-pip install imath
-conda install -c conda-forge openexr
-(or conda install -c conda-forge openexr-python)
 ```
 
-## Datasets
-Download the data [here](https://drive.google.com/drive/folders/1W7apuXPA3EkyUs8VgZgwdMpnc96aLXXJ). Addtionally, you can generate a synthetic dataset using Mitsuba 3 with reference to this code [here](https://drive.google.com/drive/folders/1IDQsnRMGTXcek4TMs2PjO_0IHs-zxMgz). Place the downloaded dataset according to the following directory structure:
-
+## Image Datasets
+You can use any image datasets..
+논문에서는 MIT-Adobe 5K를 사용..
+image 파일과 annotation 파일 필요
 ```
 data
 |-- synthetic
@@ -27,26 +27,7 @@ data
     |-- ...
 ```
 
+## Training Target Descriptions
+우리는 학습 때 Target description으로 [Color Names Database](https://github.com/meodai/color-names)를 사용..
+csv 폴더 내에 [colornames.csv](https://github.com/meodai/color-names/blob/master/src/colornames.csv)
 
-## How To Run?
-To train NeSpoF on synthetic datasets:
-```
-python run_nespof.py --config configs/synthetic/{DATASET}.txt
-```
-replace {DATASET} with ajar | cbox_dragon | cbox_sphere | hotdog.
-
----
-
-To train NeSpoF on real-world datasets:
-```
-python run_nespof.py --config configs/real/{DATASET}.txt
-```
-replace {DATASET} with scene_1 | scene_2 | scene_3 | scene_4.
-
----
-
-After training, you can also render the video for Stokes vector and polarimetric visualization:
-```
-python run_nespof.py --config configs/video/{DATASET}.txt
-```
-replace {DATASET} with ajar | cbox_dragon | cbox_sphere | hotdog | scene_1 | scene_2 | scene_3 | scene_4.
