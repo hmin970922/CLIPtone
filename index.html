@@ -183,22 +183,19 @@
       <div class="column is-four-fifths">
         <h2 class="title is-3">Method</h2>
         <div class="content has-text-justified"> -->    
-      <div class="columns is-centered">      
+      <div class="columns is-centered has-text-centered">      
         <div class="column is-full-width">
           <h2 class="title is-3">Method</h2>
+          <img src="./static/images/Method.png"
+                 class="interpolation-image"
+                 alt="Network architecture."
+                 width="100%"/>
+          <div class="content has-text-justified">
           <p>
             We propose modeling the spectro-polarimetric field $f(\cdot)$ using NeSpoF, 
             a neural representation that describes the Stokes vector $\mathbf{s}$ and volumetric density $\sigma$ 
             for the input variables of position, direction, and wavelength.
           </p>
-
-          <div class="column is-centered has-text-centered"><p>$\mathbf{s}, \sigma = F_\Theta(x,y,z,\theta, \phi, \lambda)$</p></div>
-
-          <img src="./static/images/Method.png"
-                 class="interpolation-image"
-                 alt="Network architecture."
-                 width="100%"/>
-          
           <p>
             We design NeSpoF with a positional MLP, $F_\Theta^p$, and a spectro-directional MLP, $F_\Theta^d$ and turn to model
             a physically-valid Stokes vector ($s_0^2 \geq s_1^2+s_2^2+s_3^2$) by using intermediate polarimetric properties 
@@ -206,6 +203,7 @@
             Additionally, we perform coordinate conversions of Stokes vectors since the polarization state of a light ray can be 
             described differently with Stokes vectors at different coordinates.
           </p>
+          </div>
         </div>
       </div>
     <!--/ Method. -->
@@ -214,9 +212,10 @@
 
 <section class="section">
   <div class="container is-max-desktop">
-      <div class="columns is-centered has-text-centered">      
-        <div class="column is-full-width">
-          <h2 class="title is-3">Comparisons</h2>
+    <div class="columns is-centered has-text-centered">      
+      <div class="column is-full-width">
+        <h2 class="title is-3">Comparisons</h2>
+          <div class="content has-text-justified">
           <p>
             We built a portable hyperspectral polarimetric imaging system, consisting of a monochromatic camera, LCTF that controls the transmitted wavelength, 
             and a quarter wave plate mounted on a motorized rotation stage.
@@ -231,8 +230,9 @@
             We capture a scene for 21 wavelengths and 4 quarter-wave plate angles and reconstruct 
             per-pixel Stokes vector by solving a least-squares problem with spatially-varying spectro-polarimetric calibration using these captured images.
           </p> -->
-        </div>
-      </div>
+          </div>
+      </div
+    </div>
   </div>
 </section>
 
@@ -241,6 +241,7 @@
       <div class="columns is-centered has-text-centered">      
         <div class="column is-full-width">
           <h2 class="title is-3">Results</h2>
+            <div class="content has-text-justified">
           <p>
             We built a portable hyperspectral polarimetric imaging system, consisting of a monochromatic camera, LCTF that controls the transmitted wavelength, 
             and a quarter wave plate mounted on a motorized rotation stage.
@@ -250,11 +251,11 @@
                  class="interpolation-image"
                  alt="Network architecture."
                  width="100%"/>
-
           <!-- <p>
             We capture a scene for 21 wavelengths and 4 quarter-wave plate angles and reconstruct 
             per-pixel Stokes vector by solving a least-squares problem with spatially-varying spectro-polarimetric calibration using these captured images.
           </p> -->
+            </div>
         </div>
       </div>
   </div>
