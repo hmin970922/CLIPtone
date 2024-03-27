@@ -114,23 +114,19 @@ body {
 
 .results-carousel {
   overflow: hidden;
-  width: auto;        /* 이미지 크기에 자동으로 맞춥니다. */
-  max-width: 90vw;    /* 뷰포트 너비의 90%를 최대 너비로 설정합니다. */
-  margin-left: auto;  /* 가로 중앙 정렬을 위해 */
-  margin-right: auto; /* 좌우 마진을 auto로 설정합니다. */
 }
 
 .results-carousel .item {
+  margin: 5px;
   overflow: hidden;
+  border: 1px solid #bbb;
+  border-radius: 10px;
   padding: 0;
   font-size: 0;
 }
+
 .results-carousel .item img {
   margin: 0;
-  width: 100%;      /* Container 너비에 맞춰 이미지를 조정합니다. */
-  height: auto;     /* 이미지의 높이를 원본 비율대로 조정합니다. */
-  border: 5px solid #bbb;
-  border-radius: 10px;
 }
 
 
