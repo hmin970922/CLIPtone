@@ -129,13 +129,9 @@ body {
   font-size: 0;
 }
 .results-carousel .item img {
-  /* Make image responsive to container size */
-  max-width: 100%;
-  max-height: auto;
-  /* Center the image inside the item */
-  margin: auto;
-  /* Remove the explicit height if set, as max-height is now being used */
-  height: auto;
+  margin: 0
+  width: 100%;      /* Container 너비에 맞춰 이미지를 조정합니다. */
+  height: auto;     /* 이미지의 높이를 원본 비율대로 조정합니다. */
 }
 
 
