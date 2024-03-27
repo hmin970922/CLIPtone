@@ -114,8 +114,8 @@ body {
 
 .results-carousel {
   overflow: hidden;
-  width: auto;
-  height: auto;
+  width: 832px;
+  height: 926px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -137,7 +137,7 @@ body {
 .results-carousel .item img {
   /* Make image responsive to container size */
   max-width: 100%;
-  max-height: 50%;
+  max-height: auto;
   /* Center the image inside the item */
   margin: auto;
   /* Remove the explicit height if set, as max-height is now being used */
