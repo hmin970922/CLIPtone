@@ -126,12 +126,12 @@ body {
   border: 1px solid #bbb;
   border-radius: 10px;
   padding: 0;
-  font-size: 0;
-  width: auto;
-  height: auto;
   max-width: 100%; */
   border: 1px solid #bbb;
   border-radius: 10px;
+  font-size: 0;
+  width: auto;
+  height: auto;
   display: flex;
   align-items: center;
 }
