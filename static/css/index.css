@@ -130,6 +130,8 @@ body {
   width: auto;
   height: auto;
   max-width: 100%; */
+  border: 1px solid #bbb;
+  border-radius: 10px;
   display: flex;
   align-items: center;
 }
