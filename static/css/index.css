@@ -120,7 +120,7 @@ body {
 }
 
 .results-carousel .item {
-  margin: 5px;
+  /* margin: 5px;
   overflow: hidden;
   border: 1px solid #bbb;
   border-radius: 10px;
@@ -128,7 +128,7 @@ body {
   font-size: 0;
   width: auto;
   height: auto;
-  max-width: 100%;
+  max-width: 100%; */
   display: flex;
   align-items: center;
 }
