@@ -192,16 +192,9 @@
                  width="100%"/>
           <div class="content has-text-justified">
           <p>
-            We propose modeling the spectro-polarimetric field $f(\cdot)$ using NeSpoF, 
-            a neural representation that describes the Stokes vector $\mathbf{s}$ and volumetric density $\sigma$ 
-            for the input variables of position, direction, and wavelength.
-          </p>
-          <p>
-            We design NeSpoF with a positional MLP, $F_\Theta^p$, and a spectro-directional MLP, $F_\Theta^d$ and turn to model
-            a physically-valid Stokes vector ($s_0^2 \geq s_1^2+s_2^2+s_3^2$) by using intermediate polarimetric properties 
-            as outputs ($s_0$, $\rho$, $\chi$, and $\psi$).
-            Additionally, we perform coordinate conversions of Stokes vectors since the polarization state of a light ray can be 
-            described differently with Stokes vectors at different coordinates.
+            CLIPtone consists of a text adaptor and a tone adjustment network.
+            The text adaptor calculates a directional vector within CLIP embedding space from input text descriptions and estimates modulation parameters for the AdaInt module and the weight predictor of the tone adjustment network.
+            The modulated tone adjustment network, pre-trained on an image enhancement dataset, adaptively constructs an image-text adaptive 3D LUT through a combination of basis 3D LUTs and non-uniform sampling, ultimately adjusting the color values of the input image.
           </p>
           </div>
         </div>
