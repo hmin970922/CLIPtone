@@ -114,6 +114,9 @@ body {
 
 .results-carousel {
   overflow: hidden;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .results-carousel .item {
@@ -126,10 +129,18 @@ body {
   width: auto;
   height: auto;
   max-width: 100%;
+  display: flex;
+  align-items: center;
 }
 
-.results-carousel video {
-  margin: 0;
+.results-carousel .item img {
+  /* Make image responsive to container size */
+  max-width: 100%;
+  max-height: 100%;
+  /* Center the image inside the item */
+  margin: auto;
+  /* Remove the explicit height if set, as max-height is now being used */
+  height: auto;
 }
 
 
