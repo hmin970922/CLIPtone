@@ -11,6 +11,8 @@ cd CLIPtone
 pip install -r requirements.txt
 ```
 
+## Will Be Soon..
+
 ## Image Datasets
 You can use any image datasets..
 논문에서는 MIT-Adobe 5K를 사용..
@@ -26,6 +28,7 @@ data
     |-- scene_2
     |-- ...
 ```
+
 
 ## Training Target Descriptions
 우리는 학습 때 Target description으로 [Color Names Database](https://github.com/meodai/color-names)를 사용..
