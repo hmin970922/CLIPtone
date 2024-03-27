@@ -114,28 +114,16 @@ body {
 
 .results-carousel {
   overflow: hidden;
-  width: 842px;
-  height: 946px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .results-carousel .item {
-  /* margin: 5px;
+  margin: 5px;
   overflow: hidden;
   border: 1px solid #bbb;
   border-radius: 10px;
   padding: 0;
-  max-width: 100%; */
-  border: 1px solid #bbb;
-  border-radius: 10px;
   font-size: 0;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: center;
 }
-
 .results-carousel .item img {
   /* Make image responsive to container size */
   max-width: 100%;
