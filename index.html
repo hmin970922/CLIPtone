@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-        content="Deformable Neural Radiance Fields creates free-viewpoint portraits (nerfies) from casually captured videos.">
+        content="CLIPtone">
   <meta name="keywords" content="Tone Adjustment, Image Enhancement, CLIP">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CLIPtone: Unsupervised Learning for Text-based Image Tone Adjustment</title>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+<!--   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script> -->
   <script>
     window.dataLayer = window.dataLayer || [];
 
@@ -143,7 +143,7 @@
       <!-- <h2 class="subtitle has-text-centered"> -->
       <h2 class="subtitle is-full-width">
         We present CLIPtone, a text-based image tone adjustment framework trained in an unsupervised manner.
-        With its superior understanding of natural languages, CLIPtone is capable of performing successful adjustments across a range of text descriptions, including those previously deemed impossible.
+        With its superior understanding of natural languages, CLIPtone is capable of performing successful adjustments across a range of text descriptions, including those previously deemed challenging.
       </h2>
     </div>
   </div>
@@ -192,9 +192,9 @@
                  width="100%"/>
           <div class="content has-text-justified">
           <p>
-            CLIPtone consists of a text adaptor and a tone adjustment network.
-            The text adaptor calculates a directional vector within CLIP embedding space from input text descriptions and estimates modulation parameters for the AdaInt module and the weight predictor of the tone adjustment network.
-            The modulated tone adjustment network, pre-trained on an image enhancement dataset, adaptively constructs an image-text adaptive 3D LUT through a combination of basis 3D LUTs and non-uniform sampling, ultimately adjusting the color values of the input image.
+            CLIPtone consists of a text adapter and a tone adjustment network.
+            From a target text description, the text adapter calculates a directional vector within the CLIP embedding space from the source to target text descriptions and estimates the modulation parameter ∆θ for the AdaInt module and the weight predictor of the tone adjustment network.
+            The modulated tone adjustment network adaptively constructs an image-text adaptive 3D LUT through fusing basis 3D LUTs and non-uniform sampling, ultimately adjusting the color values of an input image.
           </p>
           </div>
         </div>
