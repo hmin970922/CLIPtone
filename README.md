@@ -15,7 +15,7 @@ pip install -r requirements.txt
 
 
 ## Image Datasets
-Will be Soon...
+We will release soon...
 You can use any image datasets..
 논문에서는 MIT-Adobe 5K를 사용..
 image 파일과 annotation 파일 필요
