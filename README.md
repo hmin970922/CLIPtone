@@ -3,7 +3,7 @@
 The code is based on [AdaInt](https://github.com/ImCharlesY/AdaInt) and [StyleGAN-nada](https://github.com/rinongal/StyleGAN-nada).
 
 
-**The current README.md file is not the final version. I will update and upload the revised version soon.**
+**The current README.md file is not the final version. I will upload the revised version soon.**
 
 <!--
 
