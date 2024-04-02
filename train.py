@@ -11,7 +11,6 @@ from criteria import CLIPLoss #, ColorLoss
 
 import torch.nn as nn
 import random
-# import wandb
 
 def main():
     parser = argparse.ArgumentParser()
@@ -37,8 +36,11 @@ def main():
     parser.add_argument('--print_iter_freq', type=int, default=100)
     parser.add_argument('--valid_epoch_freq', type=int, default=1)
     parser.add_argument('--direction_dataset_path', type=str, default='./csv/target_direction_RN50.pth')
+    parser.add_argument('--wandb', type=bool, default=False, help='logging with wandb')
     
-    # wandb.init(project="CLIPtone", name="CLIPtone", entity="hyeongmin")
+    if args.wandb:    
+        import wandb
+        wandb.init(project="CLIPtone", name="CLIPtone")
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     args = parser.parse_args()
@@ -144,7 +146,9 @@ sparse = {sparse_loss.item():.6f}, smooth = {smooth_loss.item():.6f}, monotonici
         avg_total_loss = sum_total_loss / iteration_count
         iteration_count = 0
         
-        # wandb.log({"epoch": epoch, "total": avg_total_loss, "content": avg_content_loss, "clip": avg_clip_loss, "sparse": avg_sparse_loss, "smooth": avg_smooth_loss, "monotonicity": avg_monotonicity_loss})
+        if args.wandb:
+            wandb.log({"epoch": epoch, "total": avg_total_loss, "content": avg_content_loss, "clip": avg_clip_loss, "sparse": avg_sparse_loss, "smooth": avg_smooth_loss, "monotonicity": avg_monotonicity_loss})
+            
         sum_content_loss, sum_clip_loss, sum_sparse_loss, sum_smooth_loss, sum_monotonicity_loss, sum_total_loss = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         
         if epoch % args.valid_epoch_freq == 0:
