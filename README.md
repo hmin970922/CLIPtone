@@ -5,6 +5,7 @@ The code is based on [AdaInt](https://github.com/ImCharlesY/AdaInt) and [StyleGA
 
 **The current README.md file is not the final version. I will update and upload the revised version soon.**
 
+<!--
 
 ## Installation
 ```
@@ -36,3 +37,4 @@ data
 우리는 학습 때 Target description으로 [Color Names Database](https://github.com/meodai/color-names)를 사용..
 csv 폴더 내에 [colornames.csv](https://github.com/meodai/color-names/blob/master/src/colornames.csv)
 
+-->
