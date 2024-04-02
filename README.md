@@ -11,15 +11,23 @@ The code is based on [AdaInt](https://github.com/ImCharlesY/AdaInt) and [StyleGA
 ```
 git clone https://github.com/hmin970922/CLIPtone.git
 cd CLIPtone
+
 pip install -r requirements.txt
+python ailut_transform/setup.py install
+
+pip install ftfy regex tqdm
+pip install git+https://github.com/openai/CLIP.git
 ```
 
 
-## Image Datasets
+## Datasets
 We will release soon...
+
+### Image Datasets
 You can use any image datasets..
 논문에서는 MIT-Adobe 5K를 사용..
 image 파일과 annotation 파일 필요
+
 ```
 data
 |-- synthetic
@@ -32,8 +40,7 @@ data
     |-- ...
 ```
 
-
-## Training Target Descriptions
+### Text Datasets
 우리는 학습 때 Target description으로 [Color Names Database](https://github.com/meodai/color-names)를 사용..
 csv 폴더 내에 [colornames.csv](https://github.com/meodai/color-names/blob/master/src/colornames.csv)
 
