@@ -1,5 +1,5 @@
 # CLIPtone
-[CLIPtone](https://hmin970922.github.io/CLIPtone/) is a text-based tone adjustment method with unsupervised manner.
+[CLIPtone](https://hmin970922.github.io/CLIPtone/) is a text-based image tone adjustment method in an unsupervised manner, with minimal dataset costs.
 The code is based on [AdaInt](https://github.com/ImCharlesY/AdaInt) and [StyleGAN-nada](https://github.com/rinongal/StyleGAN-nada).
 
 
