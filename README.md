@@ -69,7 +69,7 @@ python test.py --save_path=[PATH/TO/SAVE/RESULTS] --prompt=[TARGET/TEXT/DESCRIPT
 ```
 
 ## Acknowledgements
-Our implementation is based on the ["AdaInt"](https://github.com/ImCharlesY/AdaInt).
+Our implementation is based on the ["AdaInt"](https://github.com/ImCharlesY/AdaInt) and ["StyleGAN-nada"](https://github.com/rinongal/StyleGAN-nada).
 
 ## Citation
 ```
