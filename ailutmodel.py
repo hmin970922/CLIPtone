@@ -124,6 +124,11 @@ class LUTGenerator(nn.Module):
         self.basis_luts_bank.weight.data.copy_(identity_lut.t())
 
     def forward(self, x, weights_delta = None):
+        r"""Forward function for LUTgenerator.
+
+        Args:
+            weight_delta (tensor): Number of input color channels.
+        """
         if weights_delta is not None:
             updated_params = torch.mul(self.weights_generator.weight, 1 + weights_delta)
             weights = F.linear(x, updated_params, self.weights_generator.bias)
@@ -135,6 +140,10 @@ class LUTGenerator(nn.Module):
         return weights, luts
 
     def regularizations(self, intervals, interval_adaptive = True):
+        r"""
+        Args:
+            interval_adaptive (bool): Specifies the loss function to be used. Set to True to employ our interval loss, or False to utilize AdaInt's smooth loss instead.     
+        """
         basis_luts = self.basis_luts_bank.weight.t().view(
             self.n_ranks, self.n_colors, *((self.n_vertices,) * self.n_colors))
         tv, mn = 0, 0
@@ -215,6 +224,7 @@ class AiLUT(nn.Module):
     Args:
         n_ranks (int, optional): Number of ranks in the mapping h
             (or the number of basis LUTs). Default: 3.
+        n_colors (int, optional): Number of input color channels. Default: 3.
         n_vertices (int, optional): Number of sampling points along
             each lattice dimension. Default: 33.
         en_adaint (bool, optional): Whether to enable AdaInt. Default: True.
@@ -224,16 +234,6 @@ class AiLUT(nn.Module):
             or 'res18'. Default: 'tpami'.
         pretrained (bool, optional): Whether to use ImageNet-pretrained weights.
             Only used when `backbone` is 'res18'. Default: None.
-        n_colors (int, optional): Number of input color channels. Default: 3.
-        sparse_factor (float, optional): Loss weight for the sparse regularization term.
-            Default: 0.0001.
-        smooth_factor (float, optional): Loss weight for the smoothness regularization term.
-            Default: 0.
-        monotonicity_factor (float, optional): Loss weight for the monotonicaity
-            regularization term. Default: 10.0.
-        recons_loss (dict, optional): Config for pixel-wise reconstruction loss.
-        train_cfg (dict, optional): Config for training. Default: None.
-        test_cfg (dict, optional): Config for testing. Default: None.
     """
 
 
@@ -242,31 +242,28 @@ class AiLUT(nn.Module):
         
         assert args.backbone.lower() in ['tpami', 'res18']
 
+        self.n_ranks = args.n_ranks
+        self.n_colors = args.n_colors
+        self.n_vertices = args.n_vertices
+        self.en_adaint = True
+        self.en_adaint_share = False
+        self.backbone_name = args.backbone.lower()
+        self.pretrained = None
+        
         # mapping f
         self.backbone = dict(
             tpami=TPAMIBackbone,
-            res18=Res18Backbone)[args.backbone.lower()](args.pretrained, extra_pooling=args.en_adaint)
+            res18=Res18Backbone)[args.backbone.lower()](self.pretrained, extra_pooling=True)
 
         # mapping h
         self.lut_generator = LUTGenerator(
             args.n_colors, args.n_vertices, self.backbone.out_channels, args.n_ranks)
 
         # mapping g
-        if args.en_adaint:
-            self.adaint = AdaInt(
-                args.n_colors, args.n_vertices, self.backbone.out_channels, args.en_adaint_share)
-        else:
-            uniform_vertices = torch.arange(args.n_vertices).div(args.n_vertices - 1) \
-                                    .repeat(args.n_colors, 1)
+        self.adaint = AdaInt(
+            args.n_colors, args.n_vertices, self.backbone.out_channels, self.en_adaint_share)
                 
-        self.n_ranks = args.n_ranks
-        self.n_colors = args.n_colors
-        self.n_vertices = args.n_vertices
-        self.en_adaint = args.en_adaint
-        self.sparse_factor = args.sparse_factor
-        self.smooth_factor = args.smooth_factor
-        self.monotonicity_factor = args.monotonicity_factor
-        self.backbone_name = args.backbone.lower()
+        
         
         self.fp16_enabled = False
         
@@ -300,9 +297,9 @@ class AiLUT(nn.Module):
         r"""The real implementation of model forward.
 
         Args:
-            img (Tensor): Input image, shape (b, c, h, w).
+            lq (Tensor): Input image, shape (b, c, h, w).
         Returns:
-            tuple(Tensor, Tensor, Tensor):
+            tuple (Tensor, Tensor, Tensor):
                 Output image, LUT weights, Sampling Coordinates.
         """
         # E: (b, f)

@@ -30,7 +30,7 @@ class DirectionLoss(torch.nn.Module):
         return self.loss_func(x, y)
 
 class CLIPLoss(torch.nn.Module):
-    def __init__(self, device, direction_loss_type='cosine', clip_model='RN50'): # 'ViT-B/32', 'RN50'
+    def __init__(self, device, direction_loss_type='cosine', clip_model='RN50'):
         super(CLIPLoss, self).__init__()
 
         self.device = device

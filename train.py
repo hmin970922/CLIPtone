@@ -7,43 +7,39 @@ from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 from ailutmodel import AiLUT
 from adaptation import AdaptationModule
-from criteria import CLIPLoss #, ColorLoss
-
-import torch.nn as nn
-import random
+from criteria import CLIPLoss
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--n_ranks', type=int, default=3)
-    parser.add_argument('--n_vertices', type=int, default=33)
-    parser.add_argument('--en_adaint', type=bool, default=True)
-    parser.add_argument('--en_adaint_share', type=bool, default=False)
+    
     parser.add_argument('--backbone', type=str, default='tpami')
-    parser.add_argument('--backbone_checkpoint_dir', type=str, default='./checkpoint/pretrained')
-    parser.add_argument('--backbone_checkpoint_name', type=str, default='latest.pth')
-    parser.add_argument('--pretrained', type=bool, default=False)
-    parser.add_argument('--n_colors', type=int, default=3)
-    parser.add_argument('--content_factor', type=float, default=1.0)
-    parser.add_argument('--clip_factor', type=float, default=1.0)
-    parser.add_argument('--sparse_factor', type=float, default=0.0001)
-    parser.add_argument('--smooth_factor', type=float, default=0.5)
-    parser.add_argument('--monotonicity_factor', type=float, default=0.0)
+    parser.add_argument('--backbone_checkpoint_dir', type=str, default='./checkpoint/base_network')
+    parser.add_argument('--backbone_checkpoint_name', type=str, default='AiLUT-FiveK-sRGB.pth')
+    parser.add_argument('--n_ranks', type=int, default=3, help='The number of basis LUTs.')
+    parser.add_argument('--n_vertices', type=int, default=33, help='The number of sampling points along each lattice dimension.')
+    parser.add_argument('--n_colors', type=int, default=3, help='The number of input color channels.')
+    parser.add_argument('--content_factor', type=float, default=1.0, help='Loss weight for the content loss term.')
+    parser.add_argument('--clip_factor', type=float, default=1.0, help='Loss weight for the CLIP loss term.')
+    parser.add_argument('--weight_factor', type=float, default=0.0001, help='Loss weight for weight loss term.')
+    parser.add_argument('--interval_factor', type=float, default=0.5, help='Loss weight for interval loss term.')
+    parser.add_argument('--monotonicity_factor', type=float, default=0.0, help = 'Loss weight for the monotonicity regularization term.' )
     parser.add_argument('--dataset_dir', type=str, default='/data/FiveK/')
     parser.add_argument('--save_path', type=str, default='./')
     parser.add_argument('--clip_model', type=str, default='RN50')
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--num_epoch', type=int, default=400)
     parser.add_argument('--print_iter_freq', type=int, default=100)
-    parser.add_argument('--valid_epoch_freq', type=int, default=1)
+    parser.add_argument('--valid_epoch_freq', type=int, default=40)
     parser.add_argument('--direction_dataset_path', type=str, default='./csv/target_direction_RN50.pth')
     parser.add_argument('--wandb', type=bool, default=False, help='logging with wandb')
+    
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    args = parser.parse_args()
     
     if args.wandb:    
         import wandb
         wandb.init(project="CLIPtone", name="CLIPtone")
     
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    args = parser.parse_args()
     # DataLoader
     train_dataset = SingleImageDataset(args.dataset_dir, os.path.join(args.dataset_dir,'train.txt'), aug=True)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
@@ -64,16 +60,16 @@ def main():
     adaptation_module = AdaptationModule(args, CLIPloss.model.text_projection.shape[1], model.backbone.out_channels).to(device)
     optimizer = torch.optim.Adam(adaptation_module.parameters(), lr=1e-3, weight_decay=0, betas=(0.9, 0.999), eps=1e-8)
     
-    save_checkpoint_path = os.path.join(args.save_path, 'checkpoint', args.clip_model)
+    save_checkpoint_path = os.path.join(args.save_path, 'checkpoint', 'text_adaptor', args.clip_model)
     save_result_path = os.path.join(args.save_path, 'result', args.clip_model)
     
     if not os.path.exists(save_checkpoint_path):
         os.makedirs(save_checkpoint_path)
      
-    test_text_prompts = ['Warm photo.', 'Cold photo.', 'Bright photo.', 'Dark photo.', 'Monotone photo.', 'Colorful photo.', 'Vivid photo.', 'High contrast photo.']
+    test_text_prompts = ['Warm photo.', 'Cold photo.', 'High contrast photo.']
     
     total_steps = 0
-    sum_content_loss, sum_clip_loss, sum_sparse_loss, sum_smooth_loss, sum_monotonicity_loss, sum_total_loss = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    sum_content_loss, sum_clip_loss, sum_weight_loss, sum_interval_loss, sum_monotonicity_loss, sum_total_loss = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     iteration_count = 0
     
     for epoch in range(1, args.num_epoch + 1):
@@ -99,17 +95,17 @@ def main():
             else:
                 clip_loss = 0.0
             
-            reg_smooth, reg_monotonicity = model.lut_generator.regularizations(vertices, interval_adaptive = True)
+            reg_interval, reg_monotonicity = model.lut_generator.regularizations(vertices, interval_adaptive = True)
             
-            if args.sparse_factor > 0:
-                sparse_loss = args.sparse_factor * torch.mean(weights.pow(2))
+            if args.weight_factor > 0:
+                weight_loss = args.weight_factor * torch.mean(weights.pow(2))
             else:
-                sparse_loss = 0.0
+                weight_loss = 0.0
             
-            if args.smooth_factor > 0:
-                smooth_loss = args.smooth_factor * reg_smooth
+            if args.interval_factor > 0:
+                interval_loss = args.interval_factor * reg_interval
             else:
-                smooth_loss = 0.0
+                interval_loss = 0.0
                 
             if args.monotonicity_factor > 0:
                 monotonicity_loss = args.monotonicity_factor * reg_monotonicity
@@ -117,7 +113,7 @@ def main():
                 monotonicity_loss = 0.0
                 
                 
-            total_loss = content_loss + clip_loss + sparse_loss + smooth_loss + monotonicity_loss
+            total_loss = content_loss + clip_loss + weight_loss + interval_loss + monotonicity_loss
         
             optimizer.zero_grad()
             total_loss.backward()
@@ -127,36 +123,35 @@ def main():
             iteration_count += 1
             sum_content_loss += content_loss.item()
             sum_clip_loss += clip_loss.item()
-            sum_sparse_loss += sparse_loss.item()
-            sum_smooth_loss += smooth_loss.item()
+            sum_weight_loss += weight_loss.item()
+            sum_interval_loss += interval_loss.item()
             sum_monotonicity_loss += monotonicity_loss
             sum_total_loss += total_loss.item()
             
             if iteration_count % args.print_iter_freq == 0:
                 print(f'iter = {total_steps}, total_loss = {total_loss.item():.6f}, content = {content_loss.item():.6f}, clip = {clip_loss.item():.6f}, \
-sparse = {sparse_loss.item():.6f}, smooth = {smooth_loss.item():.6f}, monotonicity = {monotonicity_loss:.6f}')
+weight = {weight_loss.item():.6f}, interval = {interval_loss.item():.6f}, monotonicity = {monotonicity_loss:.6f}')
                 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, args.num_epoch, time.time() - epoch_start_time))
         
         avg_content_loss = sum_content_loss / iteration_count
         avg_clip_loss = sum_clip_loss / iteration_count
-        avg_sparse_loss = sum_sparse_loss / iteration_count
-        avg_smooth_loss = sum_smooth_loss / iteration_count
+        avg_weight_loss = sum_weight_loss / iteration_count
+        avg_interval_loss = sum_interval_loss / iteration_count
         avg_monotonicity_loss = sum_monotonicity_loss / iteration_count
         avg_total_loss = sum_total_loss / iteration_count
         iteration_count = 0
         
         if args.wandb:
-            wandb.log({"epoch": epoch, "total": avg_total_loss, "content": avg_content_loss, "clip": avg_clip_loss, "sparse": avg_sparse_loss, "smooth": avg_smooth_loss, "monotonicity": avg_monotonicity_loss})
+            wandb.log({"epoch": epoch, "total": avg_total_loss, "content": avg_content_loss, "clip": avg_clip_loss, "weight": avg_weight_loss, "interval": avg_interval_loss, "monotonicity": avg_monotonicity_loss})
             
-        sum_content_loss, sum_clip_loss, sum_sparse_loss, sum_smooth_loss, sum_monotonicity_loss, sum_total_loss = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        sum_content_loss, sum_clip_loss, sum_weight_loss, sum_interval_loss, sum_monotonicity_loss, sum_total_loss = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         
         if epoch % args.valid_epoch_freq == 0:
             model.eval()
             adaptation_module.requires_grad_(False)
             adaptation_module.eval()
             
-            valid_loss = 0.0
             for i, (lq,  file_name) in enumerate(valid_loader):
                 lq = lq.to(device)
                 file_name = os.path.splitext(file_name[0])[0]
@@ -164,7 +159,6 @@ sparse = {sparse_loss.item():.6f}, smooth = {smooth_loss.item():.6f}, monotonici
                     target_direction = CLIPloss.compute_text_direction('Normal photo.', test_text_prompts[index])
                     weights_deltas = adaptation_module(target_direction)
                     out, _, _ = model(lq, weights_deltas = weights_deltas)
-                    valid_loss += CLIPloss(lq, out, target_direction)
                     save_path = os.path.join(save_result_path, file_name)
                 
                     if not os.path.exists(save_path):
@@ -172,9 +166,8 @@ sparse = {sparse_loss.item():.6f}, smooth = {smooth_loss.item():.6f}, monotonici
                         
                     save_image(out, os.path.join(save_path, f'{file_name}-{total_steps:06d}_{test_text_prompts[index]}.png'))
             
-            print(f'valid loss = {valid_loss / (len(valid_loader) * len(test_text_prompts))}')
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
-            torch.save(adaptation_module.state_dict(), f'{save_checkpoint_path}/{epoch}_{valid_loss / (len(valid_loader) * len(test_text_prompts))}.pth')
+            torch.save(adaptation_module.state_dict(), f'{save_checkpoint_path}/{epoch}.pth')
 
 
 
