@@ -35,7 +35,7 @@ data/FiveK/
     expertC/
     train_input.txt
     train_label.txt
-    train.txt # combined train_input.txt and train_label.txt
+    train.txt # combine train_input.txt and train_label.txt
     test.txt
 ```
 You are free to employ any image dataset, as the requirement for ground truth images is waived.
