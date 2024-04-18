@@ -11,7 +11,7 @@ import pandas as pd
 
 class SingleImageDataset(Dataset):
     def __init__(self, image_path, ann_file, aug=True, crop_ratio=(0.6, 1.0), p=0.5, brightness=0.2, contrast=0.0, saturation=0.2, hue=0.0):
-        self.dir_lq = os.path.join(image_path, 'lq')
+        self.dir_lq = os.path.join(image_path, 'input/JPG/480p')
         self.ann_file = ann_file
         self.data_infos = self.load_annotations(self.ann_file)
         
