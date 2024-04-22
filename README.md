@@ -73,7 +73,7 @@ Our implementation is based on the ["AdaInt"](https://github.com/ImCharlesY/AdaI
 
 ## Citation
 ```
-@inproceedings{lee024cliptone,
+@inproceedings{lee2024cliptone,
         title={CLIPtone: Unsupervised Learning for Text-based Image Tone Adjustment},
         author={Lee, Hyeongmin and Kang, Kyoungkook and Ok, Jungseul and Cho, Sunghyun},
         booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
