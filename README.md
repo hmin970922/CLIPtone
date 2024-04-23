@@ -56,6 +56,7 @@ These directional vectors are then utilized as the text dataset for training.
 
 ## Training
 To train our text adaptor, a [pre-trained model](https://github.com/ImCharlesY/AdaInt/blob/main/pretrained/AiLUT-FiveK-sRGB.pth) of the backbone network is required.
+
 Please download the pre-trained model and place it in the `./checkpoint/base_network/`.
 To begin the training process, execute the command below:
 ```
@@ -64,6 +65,7 @@ python train.py --save_path=[PATH/TO/SAVE/RESULTS]
 
 ## Testing
 We provide a [pre-trained model](https://drive.google.com/file/d/171NTXGgme8AmSJJyy1F4hEE3OnRBQuql/view?usp=sharing) of our text adapter.
+
 Place the downloaded model in the `./checkpoint/text_adaptor/RN50/`, and then execute the command below:
 ```
 python test.py --save_path=[PATH/TO/SAVE/RESULTS] --prompt=[TARGET/TEXT/DESCRIPTION]
