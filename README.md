@@ -26,8 +26,11 @@ Detailed explanations of each type of dataset are outlined in the sections below
 
 ### Image Dataset
 In our paper, we employ the [MIT-Adobe 5K Dataset](https://data.csail.mit.edu/graphics/fivek/) as the image dataset.
+
 To facilitate a quick setup, we utilize the dataset provided by [Zeng](https://github.com/HuiZeng/Image-Adaptive-3DLUT). ([[GoogleDrive](https://drive.google.com/drive/folders/1Y1Rv3uGiJkP6CIrNTSKxPn1p-WFAc48a?usp=sharing)], [[OneDrive](https://connectpolyu-my.sharepoint.com/personal/16901447r_connect_polyu_hk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2F16901447r%5Fconnect%5Fpolyu%5Fhk%2FDocuments%2Fimage%5Fadaptive%5Flut%2Fdata&ga=1)], [[baiduyun](https://pan.baidu.com/share/init?surl=CsQRFsEPZCSjkT3Z1X_B1w):5fyk])
+
 Please download the FiveK dataset, place it in the `./data/`, and combine the **'train_label.txt'** and **'train_input.txt'** files into a unified annotation file named **'train.txt'**, which is utilized in our training process.
+
 Make sure to organize the directory as follows:
 ```
 data/FiveK/
