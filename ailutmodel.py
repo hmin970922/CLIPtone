@@ -130,8 +130,13 @@ class LUTGenerator(nn.Module):
             weight_delta (tensor): Number of input color channels.
         """
         if weights_delta is not None:
-            updated_params = torch.mul(self.weights_generator.weight, 1 + weights_delta)
-            weights = F.linear(x, updated_params, self.weights_generator.bias)
+            # weights_delta: (b_d, n_ranks, n_feats), weight: (n_ranks, n_feats)
+            updated_params = self.weights_generator.weight.unsqueeze(0) * (1 + weights_delta)
+            # weights_delta 배치가 1(단일 방향)이면 이미지 배치 크기로 확장
+            updated_params = updated_params.expand(x.shape[0], -1, -1)
+            # x: (b, n_feats) -> bmm -> (b, n_ranks)
+            weights = torch.bmm(x.unsqueeze(1), updated_params.transpose(1, 2)).squeeze(1)
+            weights = weights + self.weights_generator.bias
         else:
             weights = F.linear(x, self.weights_generator.weight, self.weights_generator.bias)
         
@@ -153,7 +158,7 @@ class LUTGenerator(nn.Module):
                 diff = diff.permute((0, 1, 4, 3, 2))
             if i == 3:
                 diff = diff.permute((0, 1, 2, 4, 3))
-            vertices_diff = torch.pow(torch.diff(intervals, dim=2).squeeze(), 0.7)
+            vertices_diff = torch.pow(torch.diff(intervals, dim=2).mean(0).squeeze(), 0.7)
             tv_diff = diff / vertices_diff[i-2]
             if interval_adaptive:
                 tv += torch.square(tv_diff).sum(0).mean()
@@ -205,8 +210,12 @@ class AdaInt(nn.Module):
         """
         
         if weights_delta is not None:
-            updated_params = torch.mul(self.intervals_generator.weight, 1 + weights_delta)
-            intervals = F.linear(x, updated_params, self.intervals_generator.bias)
+            # weights_delta: (b_d, out, n_feats), weight: (out, n_feats)
+            updated_params = self.intervals_generator.weight.unsqueeze(0) * (1 + weights_delta)
+            # weights_delta 배치가 1(단일 방향)이면 이미지 배치 크기로 확장
+            updated_params = updated_params.expand(x.shape[0], -1, -1)
+            intervals = torch.bmm(x.unsqueeze(1), updated_params.transpose(1, 2)).squeeze(1)
+            intervals = intervals + self.intervals_generator.bias
         else:
             intervals = F.linear(x, self.intervals_generator.weight, self.intervals_generator.bias)
             

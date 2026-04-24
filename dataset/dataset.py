@@ -10,8 +10,8 @@ import pandas as pd
 
 
 class SingleImageDataset(Dataset):
-    def __init__(self, image_path, ann_file, aug=True, crop_ratio=(0.6, 1.0), p=0.5, brightness=0.2, contrast=0.0, saturation=0.2, hue=0.0):
-        self.dir_lq = os.path.join(image_path, 'input/JPG/480p')
+    def __init__(self, image_path, ann_file, aug=True, crop_ratio=(0.6, 1.0), p=0.5, brightness=0.2, contrast=0.0, saturation=0.2, hue=0.0, size=None, cache=True, img_subdir='input/JPG/480p'):
+        self.dir_lq = os.path.join(image_path, img_subdir)
         self.ann_file = ann_file
         self.data_infos = self.load_annotations(self.ann_file)
         
@@ -22,18 +22,30 @@ class SingleImageDataset(Dataset):
         self.contrast = contrast
         self.saturation = saturation
         self.hue = hue
+        self.size = size
+        # 이미지를 RAM에 캐시 (첫 epoch 이후 디스크 I/O 제거)
+        self._cache = {} if cache else None
         
 
     def __len__(self):
         return len(self.data_infos)
 
     def __getitem__(self, idx):
-        lq = Image.open(self.data_infos[idx]['lq_path']).convert('RGB')
+        if self._cache is not None and idx in self._cache:
+            lq = self._cache[idx].copy()
+        else:
+            lq = Image.open(self.data_infos[idx]['lq_path']).convert('RGB')
+            if self._cache is not None:
+                self._cache[idx] = lq.copy()
+
         if self.aug:
             lq = self.custom_transformation(lq)
         
-        transform = transforms.ToTensor()
-        lq = transform(lq)
+        transform_list = []
+        if self.size is not None:
+            transform_list.append(transforms.Resize((self.size, self.size)))
+        transform_list.append(transforms.ToTensor())
+        lq = transforms.Compose(transform_list)(lq)
         file_name = self.data_infos[idx]['lq_path'].split('/')[-1]
         return lq, file_name
     

@@ -43,6 +43,6 @@ class AdaptationModule(nn.Module):
         x = self.activation(x)
         lut_weights_delta = self.lut_delta_generator(x)
         adaint_weights_delta = self.adaint_delta_generator(x)
-        lut_weights_delta = lut_weights_delta.view(self.lut_weight_dim[0], self.lut_weight_dim[1])
-        adaint_weights_delta = adaint_weights_delta.view(self.adaint_weight_dim[0], self.adaint_weight_dim[1])
+        lut_weights_delta = lut_weights_delta.view(x.shape[0], self.lut_weight_dim[0], self.lut_weight_dim[1])
+        adaint_weights_delta = adaint_weights_delta.view(x.shape[0], self.adaint_weight_dim[0], self.adaint_weight_dim[1])
         return (intensity * lut_weights_delta, intensity * adaint_weights_delta)

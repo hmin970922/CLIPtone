@@ -1,10 +1,13 @@
 import torch
 from criteria import CLIPLoss
 import pandas as pd
+from tqdm import tqdm
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-clip_model = 'RN50'
-clip_models = CLIPLoss(device, clip_model = clip_model)
+clip_model = 'MobileCLIP2-S0'
+clip_pretrained = 'dfndr2b'
+
+clip_models = CLIPLoss(device, clip_model=clip_model, clip_pretrained=clip_pretrained)
 
 csv_path = './csv/colornames.csv'
 
@@ -14,7 +17,7 @@ df = df['name'] + ' photo.'
 feature_list = []
 
 source_text = 'Normal photo.'
-for idx in range(len(df)):
+for idx in tqdm(range(len(df))):
     target_text = df[idx]
     direction_feature = clip_models.compute_text_direction(source_text, target_text)
     feature_list.append(direction_feature)

@@ -5,10 +5,11 @@ import torch.nn.functional as F
 import numpy as np
 
 import math
-import clip
+import open_clip
 from PIL import Image
 
 import time
+
 
 class DirectionLoss(torch.nn.Module):
 
@@ -29,25 +30,38 @@ class DirectionLoss(torch.nn.Module):
         
         return self.loss_func(x, y)
 
+
 class CLIPLoss(torch.nn.Module):
-    def __init__(self, device, direction_loss_type='cosine', clip_model='RN50'):
+    def __init__(self, device, direction_loss_type='cosine', clip_model='MobileCLIP2-S0', clip_pretrained='dfndr2b'):
         super(CLIPLoss, self).__init__()
 
         self.device = device
-        self.model, clip_preprocess = clip.load(clip_model, device=self.device)
+        self.model, _, clip_preprocess = open_clip.create_model_and_transforms(
+            clip_model, pretrained=clip_pretrained
+        )
+        self.model = self.model.to(device)
+        self.tokenizer = open_clip.get_tokenizer(clip_model)
 
         self.clip_preprocess = clip_preprocess
-        
-        self.preprocess = transforms.Compose(clip_preprocess.transforms[:2] +                                      # to match CLIP input scale assumptions
-                                             clip_preprocess.transforms[4:])                                       # + skip convert PIL to tensor
+
+        # 텐서 입력용 전처리: Resize/CenterCrop/Normalize만 유지, PIL 변환 계열 스킵
+        tensor_transforms = [
+            t for t in clip_preprocess.transforms
+            if isinstance(t, (transforms.Resize, transforms.CenterCrop, transforms.Normalize))
+        ]
+        self.preprocess = transforms.Compose(tensor_transforms)
 
         self.cos = torch.nn.CosineSimilarity()
-        
         self.direction_loss = DirectionLoss(direction_loss_type)
         self.model.requires_grad_(False)
+        self.model.eval()
+
+    @property
+    def text_dim(self) -> int:
+        return self.model.text.output_dim
 
     def tokenize(self, strings: list):
-        return clip.tokenize(strings).to(self.device)
+        return self.tokenizer(strings).to(self.device)
 
     def encode_text(self, tokens: list) -> torch.Tensor:
         return self.model.encode_text(tokens)
@@ -55,11 +69,9 @@ class CLIPLoss(torch.nn.Module):
     def encode_images(self, images: torch.Tensor) -> torch.Tensor:
         images = self.preprocess(images).to(self.device)
         return self.model.encode_image(images)
-    
-    def get_text_features(self, class_str: str, norm: bool = True) -> torch.Tensor:
-        template_text = [class_str]
 
-        tokens = clip.tokenize(template_text).to(self.device)
+    def get_text_features(self, class_str: str, norm: bool = True) -> torch.Tensor:
+        tokens = self.tokenizer([class_str]).to(self.device)
 
         text_features = self.encode_text(tokens).detach()
 
@@ -70,7 +82,7 @@ class CLIPLoss(torch.nn.Module):
 
     def get_image_features(self, img: torch.Tensor, norm: bool = True) -> torch.Tensor:
         image_features = self.encode_images(img)
-        
+
         if norm:
             image_features /= image_features.clone().norm(dim=-1, keepdim=True)
 
@@ -84,10 +96,10 @@ class CLIPLoss(torch.nn.Module):
         text_direction /= text_direction.norm(dim=-1, keepdim=True)
 
         return text_direction
-            
-            
-    def clip_directional_loss(self, src_img: torch.Tensor, target_img: torch.Tensor, target_direction: torch.Tensor) -> torch.Tensor:
-        src_encoding    = self.get_image_features(src_img)
+
+    def clip_directional_loss(self, src_img: torch.Tensor, target_img: torch.Tensor, target_direction: torch.Tensor, src_encoding: torch.Tensor = None) -> torch.Tensor:
+        if src_encoding is None:
+            src_encoding = self.get_image_features(src_img)
         target_encoding = self.get_image_features(target_img)
 
         edit_direction = (target_encoding - src_encoding)
@@ -95,12 +107,10 @@ class CLIPLoss(torch.nn.Module):
             target_encoding = self.get_image_features(target_img + 1e-6)
             edit_direction = (target_encoding - src_encoding)
 
-        edit_direction /= (edit_direction.clone().norm(dim=-1, keepdim=True))
-        
+        edit_direction /= (edit_direction.clone().norm(dim=-1, keepdim=True).clamp(min=1e-4))
+
         return self.direction_loss(edit_direction, target_direction).mean()
-        
-    def forward(self, src_img: torch.Tensor, target_img: torch.Tensor, target_direction: torch.Tensor):
-        clip_loss = 0.0
-        clip_loss += self.clip_directional_loss(src_img, target_img, target_direction)
+
+    def forward(self, src_img: torch.Tensor, target_img: torch.Tensor, target_direction: torch.Tensor, src_encoding: torch.Tensor = None):
+        clip_loss = self.clip_directional_loss(src_img, target_img, target_direction, src_encoding=src_encoding)
         return clip_loss
-    
